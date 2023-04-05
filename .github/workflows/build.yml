@@ -19,13 +19,13 @@ jobs:
       uses: NuGet/setup-nuget@v1
     
     - name: Restore NuGet packages
-      run: nuget restore SimpleFrameworkApp-master/SimpleFrameworkApp.sln
+      run: nuget restore SimpleFrameworkApp.sln
 
     - name: Build
-      run: msbuild SimpleFrameworkApp-master/SimpleFrameworkApp.sln /p:Configuration=Release
+      run: msbuild SimpleFrameworkApp.sln /p:Configuration=Release
 
     - name: Publish to folder
-      run: msbuild SimpleFrameworkApp-master/SimpleFrameworkApp.sln /p:Configuration=Release /p:DeployOnBuild=true /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=published /p:PackageAsSingleFile=false
+      run: msbuild SimpleFrameworkApp.sln /p:Configuration=Release /p:DeployOnBuild=true /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=published /p:PackageAsSingleFile=false
 
     #- name: Deploy to Azure WebApp
       #uses: azure/webapps-deploy@v1
@@ -35,7 +35,7 @@ jobs:
         #package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
     - name: Publish artifacts
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v1
       with:
         name: webapp
         path: published
