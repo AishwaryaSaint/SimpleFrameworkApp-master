@@ -21,10 +21,10 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore SimpleFrameworkApp.sln
 
-    #- name: Build
-      #run: msbuild SimpleFrameworkApp.sln /p:Configuration=Release
-
     - name: Build
+      run: msbuild SimpleFrameworkApp.sln /p:Configuration=Release
+
+    - name: Build and publish
       run: msbuild SimpleFrameworkApp.sln /p:Configuration=Release /p:DeployOnBuild=true /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=published /p:PackageAsSingleFile=false
 
     #- name: Deploy to Azure WebApp
