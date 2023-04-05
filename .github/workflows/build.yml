@@ -1,14 +1,10 @@
-name: Build and Deploy
+name: Build
 
 on:
   push:
     branches:
       - main
-
-env:
-  AZURE_WEBAPP_NAME: SimpleFrameworkApp.sln     # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: 'published'      # set this to the path to your web app project, defaults to the repository root
-
+      
 jobs:
   build:
     name: Build and deploy
@@ -16,20 +12,22 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Setup MSBuild path
-      uses: microsoft/setup-msbuild@v1.0.1
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '[16.4,16.5)'
     
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.2
     
     - name: Restore NuGet packages
-      run: nuget restore ${{ env.AZURE_WEBAPP_NAME }}
+      run: nuget restore SimpleFrameworkApp-master/SimpleFrameworkApp.sln
 
     - name: Build
-      run: msbuild ${{ env.AZURE_WEBAPP_NAME }} /p:Configuration=Release
+      run: msbuild SimpleFrameworkApp-master/SimpleFrameworkApp.sln /p:Configuration=Release
 
     - name: Publish to folder
-      run: msbuild ${{ env.AZURE_WEBAPP_NAME }} /p:Configuration=Release /p:DeployOnBuild=true /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=${{ env.AZURE_WEBAPP_PACKAGE_PATH }} /p:PackageAsSingleFile=false
+      run: msbuild SimpleFrameworkApp-master/SimpleFrameworkApp.sln /p:Configuration=Release /p:DeployOnBuild=true /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=published /p:PackageAsSingleFile=false
 
     #- name: Deploy to Azure WebApp
       #uses: azure/webapps-deploy@v1
@@ -42,4 +40,4 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         name: webapp
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        path: published
