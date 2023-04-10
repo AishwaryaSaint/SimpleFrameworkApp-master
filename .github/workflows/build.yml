@@ -36,7 +36,7 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: webapp
-        path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/'
+        path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/bin/'
        
     - name: 'Run Azure webapp deploy action using service principal credentials'
       uses: azure/webapps-deploy@v2
