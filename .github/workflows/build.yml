@@ -1,4 +1,4 @@
-name: Deploy ASP.NET MVC App deploy to Azure Web App manually
+name: ASP.NET 4.8 MVC App build and deploy to Azure Web App manually.
 
 on: [push]
 
@@ -31,8 +31,14 @@ jobs:
 
     - name: Run MSBuild
       run: msbuild .\SimpleFrameworkApp.sln
+      
+    - name: Publish artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: webapp
+        path: published
        
-    - name: 'Run Azure webapp deploy action using publish profile credentials'
+    - name: 'Run Azure webapp deploy action using service principal credentials'
       uses: azure/webapps-deploy@v2
       with: 
         app-name: ${{ env.AZURE_WEBAPP_NAME }} # Replace with your app name
