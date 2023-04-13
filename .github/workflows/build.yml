@@ -1,4 +1,4 @@
-name: ASP.NET 4.8 MVC App build and deploy to Azure Web App manually.
+name: build and deploy with SPN.
 
 on: [push]
 
