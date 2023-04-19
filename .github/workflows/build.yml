@@ -1,6 +1,7 @@
 name: build and deploy with SPN.
 
-on: [push]
+on:
+  workflow_dispatch:
 
 env:
   AZURE_WEBAPP_NAME: poc49    # set this to your application's name
