@@ -1,65 +1,53 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: SPN poc49
+name: build and deploy with SPN.
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: 'poc49'    # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  NUGET_VERSION: '5.3.x'           # set this to the dot net version to use
+
 jobs:
-  build:
+  build-and-deploy:
     runs-on: windows-latest
-
     steps:
-      - uses: actions/checkout@v2
 
-      - name: Setup MSBuild path
-        uses: microsoft/setup-msbuild@v1.0.2
+    # checkout the repo
+    - uses: actions/checkout@main
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.5
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Install Nuget
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-version: ${{ env.NUGET_VERSION}}
+    - name: NuGet to restore dependencies as well as project-specific tools that are specified in the project file
+      run: nuget restore
+  
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Restore NuGet packages
-        run: nuget restore
-
-      - name: Publish to folder
-        run: msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="\published\"
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
-        with:
-          name: ASP-app
-          path: '/published/**'
-
-  deploy:
-    runs-on: windows-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:	
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v2
-        with:
-          name: ASP-app
-	  
-      - name: 'Az CLI login'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'poc49'
-          slot-name: 'Production'
-          package: .
-          
-      - name: logout
-        run: |
-          az logout
+    - name: Run MSBuild
+      run: msbuild .\SimpleFrameworkApp.sln
+      
+    - name: Publish artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: webapp
+        path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/bin/'
+       
+    - name: 'Run Azure webapp deploy action using service principal credentials'
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: 'poc49'
+        slot-name: 'Production'
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/'
+  
+    # Azure logout 
+    - name: logout
+      run: |
+        az logout
